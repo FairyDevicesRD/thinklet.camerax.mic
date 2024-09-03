@@ -37,3 +37,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "thinklet.camerax.mic"
 include(":app")
+include(":core")
