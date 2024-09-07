@@ -39,3 +39,4 @@ rootProject.name = "thinklet.camerax.mic"
 include(":app")
 include(":core")
 include(":multi-channel")
+include(":xfe")
