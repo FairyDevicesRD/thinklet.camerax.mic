@@ -3,7 +3,7 @@ sdk-audio = "0.1.2"
 sdk-gesture = "0.1.2"
 sdk-led = "0.1.2"
 sdk-maintenance = "0.1.2"
-camerax-camera-video = "1.5.0-alpha01"
+camerax-camera-video = "1.4.0-rc01"
 
 [libraries]
 sdk-audio = { group = "ai.fd.thinklet", name = "sdk-audio", version.ref = "sdk-audio" }
