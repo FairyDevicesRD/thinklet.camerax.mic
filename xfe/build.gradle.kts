@@ -35,7 +35,6 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation(libs.androidx.annotation)
-    implementation(thinkletLibs.sdk.audio)
     implementation(thinkletLibs.camerax.camera.video)
     testImplementation(libs.junit)
 }
