@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -89,6 +91,19 @@ publishing {
                         dependencyNode.appendNode("version", it.version)
                     }
                 }
+            }
+        }
+    }
+    repositories {
+        maven {
+            val properties = Properties()
+            properties.load(project.rootProject.file("local.properties").inputStream())
+            name = "GithubPackages"
+            val u = properties.getProperty("url") ?: System.getenv("URL")
+            url = uri(u ?: "undefine")
+            credentials {
+                username = properties.getProperty("username") ?: System.getenv("USERNAME")
+                password = properties.getProperty("token") ?: System.getenv("TOKEN")
             }
         }
     }
