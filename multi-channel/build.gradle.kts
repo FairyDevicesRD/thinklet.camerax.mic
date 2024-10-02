@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("maven-publish")
 }
 
 android {
@@ -50,4 +51,45 @@ dependencies {
     implementation(thinkletLibs.sdk.audio)
     implementation(thinkletLibs.camerax.camera.video)
     testImplementation(libs.junit)
+}
+
+// maven-publish //
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            val libVersion = libs.versions.projectVersion.get()
+
+            // TODO: ここ微妙...
+            artifact("${layout.buildDirectory.get()}/outputs/aar/thinklet.cameraX.mic_${project.name}_v${libVersion}.aar")
+            groupId = "ai.fd.thinklet.camerax"
+            artifactId = project.name
+            version = libVersion
+
+            pom {
+                name = "THINKLET CameraX mic library"
+                description = "THINKLET CameraX multi-mic module"
+                licenses {
+                    developers {
+                        developer {
+                            id = "Fairydevices"
+                            name = "Fairy Devices"
+                        }
+                    }
+                    // TODO: apply Apache 2?
+                }
+                withXml {
+                    val dependenciesNode = asNode().appendNode("dependencies")
+                    project.configurations.implementation.get().allDependencies.forEach {
+                        if (it.group == null || it.version == null || it.version == "unspecified") return@forEach
+                        println("Added dependency. ${it.group}:${it.name}:${it.version}")
+
+                        val dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", it.group)
+                        dependencyNode.appendNode("artifactId", it.name)
+                        dependencyNode.appendNode("version", it.version)
+                    }
+                }
+            }
+        }
+    }
 }
