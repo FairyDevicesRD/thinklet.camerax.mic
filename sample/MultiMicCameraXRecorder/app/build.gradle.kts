@@ -77,8 +77,6 @@ dependencies {
     implementation(thinkletLibs.camerax.mic.xfe)
     // THINKLET向けのSDKを追加
     implementation(thinkletLibs.sdk.audio)
-    implementation(thinkletLibs.sdk.maintenance)
-    implementation(thinkletLibs.sdk.led)
 
     testImplementation(libs.junit)
 

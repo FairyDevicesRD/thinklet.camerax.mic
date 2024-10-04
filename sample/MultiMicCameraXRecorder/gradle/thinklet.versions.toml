@@ -9,5 +9,3 @@ camerax-mic-core = { group = "ai.fd.thinklet.camerax", name = "core", version.re
 camerax-mic-multi-channel = { group = "ai.fd.thinklet.camerax", name = "multi-channel", version.ref = "thinkletCameraMic" }
 camerax-mic-xfe = { group = "ai.fd.thinklet.camerax", name = "xfe", version.ref = "thinkletCameraMic" }
 sdk-audio = { group = "ai.fd.thinklet", name = "sdk-audio", version.ref = "thinkletSdk" }
-sdk-maintenance = { group = "ai.fd.thinklet", name = "sdk-maintenance", version.ref = "thinkletSdk" }
-sdk-led = { group = "ai.fd.thinklet", name = "sdk-led", version.ref = "thinkletSdk" }
