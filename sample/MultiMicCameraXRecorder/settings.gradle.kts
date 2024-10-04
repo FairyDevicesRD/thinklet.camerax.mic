@@ -16,6 +16,25 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        listOf(
+            "https://maven.pkg.github.com/FairyDevicesRD/thinklet.app.sdk",
+        ).forEach { url ->
+            maven {
+                name = "GitHubPackages"
+                setUrl(url)
+                credentials {
+                    val properties = java.util.Properties()
+                    properties.load(file("local.properties").inputStream())
+                    username = System.getenv("USERNAME") ?: properties.getProperty("USERNAME") ?: ""
+                    password = System.getenv("TOKEN") ?:properties.getProperty("TOKEN") ?: ""
+                }
+            }
+        }
+    }
+    versionCatalogs {
+        create("thinkletLibs") {
+            from(files("gradle/thinklet.versions.toml"))
+        }
     }
 }
 
