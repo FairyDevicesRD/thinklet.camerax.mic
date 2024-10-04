@@ -74,6 +74,7 @@ dependencies {
     // THINKLET向けのマイクを追加
     implementation(thinkletLibs.camerax.mic.core)
     implementation(thinkletLibs.camerax.mic.multi.channel)
+    implementation(thinkletLibs.camerax.mic.xfe)
     // THINKLET向けのSDKを追加
     implementation(thinkletLibs.sdk.audio)
     implementation(thinkletLibs.sdk.maintenance)

@@ -1,6 +1,8 @@
 package com.example.fd.camerax.recorder
 
+import ai.fd.thinklet.camerax.ThinkletMic
 import android.Manifest
+import android.media.AudioManager
 import android.media.MediaActionSound
 import android.os.Bundle
 import android.view.KeyEvent
@@ -20,6 +22,7 @@ import com.example.fd.camerax.recorder.camerax.SimpleVideoCapture
 import com.example.fd.camerax.recorder.camerax.SimpleVideoCaptureImpl
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorderImpl
+import com.example.fd.camerax.recorder.camerax.mics.ThinkletMicSelector
 import com.example.fd.camerax.recorder.compose.CameraPreview
 import com.example.fd.camerax.recorder.ui.theme.MultiMicCameraXRecorderTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -34,6 +37,11 @@ class MainActivity : ComponentActivity(), Consumer<VideoRecordEvent> {
     private val recorder: ThinkletRecorder = ThinkletRecorderImpl()
     private var capture: SimpleVideoCapture? = null
     private var sound: MediaActionSound? = null
+    private val mic: ThinkletMic? by lazy {
+        ThinkletMicSelector.xfe(this.getSystemService(AudioManager::class.java))
+        // ThinkletMicSelector.simpleFive(isStereo = true)
+        // ThinkletMicSelector.droid(isStereo = true)
+    }
 
     init {
         CameraXPatch.apply()
@@ -83,7 +91,7 @@ class MainActivity : ComponentActivity(), Consumer<VideoRecordEvent> {
                         context = this,
                         lifecycleOwner = this,
                         preview = preview,
-                        videoCapture = capture?.get() //TODO
+                        videoCapture = capture?.get(mic)
                     )
                 }
             }
