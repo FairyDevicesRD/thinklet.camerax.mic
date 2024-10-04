@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.MediaActionSound
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity(), Consumer<VideoRecordEvent> {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        window.addFlags(FLAG_KEEP_SCREEN_ON)
         setContent {
             MultiMicCameraXRecorderTheme {
                 MainScreen()
