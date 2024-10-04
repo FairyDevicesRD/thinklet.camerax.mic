@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.util.Consumer
+import com.example.fd.camerax.recorder.camerax.CameraXPatch
 import com.example.fd.camerax.recorder.camerax.SimpleVideoCapture
 import com.example.fd.camerax.recorder.camerax.SimpleVideoCaptureImpl
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
@@ -33,6 +34,10 @@ class MainActivity : ComponentActivity(), Consumer<VideoRecordEvent> {
     private val recorder: ThinkletRecorder = ThinkletRecorderImpl()
     private var capture: SimpleVideoCapture? = null
     private var sound: MediaActionSound? = null
+
+    init {
+        CameraXPatch.apply()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
