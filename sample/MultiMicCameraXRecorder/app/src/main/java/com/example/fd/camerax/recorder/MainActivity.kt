@@ -1,5 +1,6 @@
 package com.example.fd.camerax.recorder
 
+import android.Manifest
 import android.media.MediaActionSound
 import android.os.Bundle
 import android.view.KeyEvent
@@ -20,6 +21,9 @@ import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorderImpl
 import com.example.fd.camerax.recorder.compose.CameraPreview
 import com.example.fd.camerax.recorder.ui.theme.MultiMicCameraXRecorderTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -45,29 +49,38 @@ class MainActivity : ComponentActivity(), Consumer<VideoRecordEvent> {
         sound?.release()
     }
 
+    @OptIn(ExperimentalPermissionsApi::class)
     @Composable
     fun MainScreen() {
+        val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
+        val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            // TODO: check permission
-            CameraPreview(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) { preview ->
-                capture = SimpleVideoCaptureImpl(
-                    context = this,
-                    listener = this
-                )
-                sound = MediaActionSound().apply {
-                    this.load(MediaActionSound.START_VIDEO_RECORDING)
-                    this.load(MediaActionSound.STOP_VIDEO_RECORDING)
+            if (!cameraPermissionState.status.isGranted) {
+                cameraPermissionState.launchPermissionRequest()
+            } else if (!micPermissionState.status.isGranted) {
+                micPermissionState.launchPermissionRequest()
+            } else {
+                CameraPreview(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                ) { preview ->
+                    capture = SimpleVideoCaptureImpl(
+                        context = this,
+                        listener = this
+                    )
+                    sound = MediaActionSound().apply {
+                        this.load(MediaActionSound.START_VIDEO_RECORDING)
+                        this.load(MediaActionSound.STOP_VIDEO_RECORDING)
+                    }
+                    recorder.build(
+                        context = this,
+                        lifecycleOwner = this,
+                        preview = preview,
+                        videoCapture = capture?.get() //TODO
+                    )
                 }
-                recorder.build(
-                    context = this,
-                    lifecycleOwner = this,
-                    preview = preview,
-                    videoCapture = capture?.get() //TODO
-                )
             }
         }
     }
