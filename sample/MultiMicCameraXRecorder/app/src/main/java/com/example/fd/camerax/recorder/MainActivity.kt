@@ -21,7 +21,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         window.addFlags(FLAG_KEEP_SCREEN_ON)
-        viewModel.setup(this, this.lifecycle)
         setContent {
             MultiMicCameraXRecorderTheme {
                 MainScreen(
@@ -34,6 +33,16 @@ class MainActivity : ComponentActivity() {
                     })
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.setup(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.teardown()
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {

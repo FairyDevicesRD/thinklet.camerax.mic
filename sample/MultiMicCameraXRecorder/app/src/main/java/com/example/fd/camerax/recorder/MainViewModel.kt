@@ -15,8 +15,6 @@ import androidx.camera.video.VideoRecordEvent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.util.Consumer
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import com.example.fd.camerax.recorder.camerax.CameraXPatch
@@ -41,9 +39,14 @@ interface IMainViewModel {
     fun isLandscape(context: Context): Boolean
 
     /**
-     * 必要なオブジェクトの生成やライフサイクルへの紐づけを行います．
+     * 必要なオブジェクトの生成を行います．
      */
-    fun setup(context: Context, lifecycle: Lifecycle)
+    fun setup(context: Context)
+
+    /**
+     * 不要なオブジェクトの削除を行います
+     */
+    fun teardown()
 
     /**
      * レコーダーを生成します．引数のPreviewを与えることで，画面上にPreviewを表示します．
@@ -56,14 +59,14 @@ interface IMainViewModel {
     fun toggleRecordState(context: Context)
 }
 
-class MainViewModel : ViewModel(), IMainViewModel, DefaultLifecycleObserver {
+class MainViewModel : ViewModel(), IMainViewModel {
     init {
         // THINKLET向けの起動高速化パッチを適応します．
         CameraXPatch.apply()
     }
 
     private val recorder: ThinkletRecorder = ThinkletRecorderImpl()
-    private lateinit var capture: SimpleVideoCapture
+    private var capture: SimpleVideoCapture? = null
     private var mic: ThinkletMic? = null
 
     private var sound: MediaActionSound? = null
@@ -87,12 +90,19 @@ class MainViewModel : ViewModel(), IMainViewModel, DefaultLifecycleObserver {
     override val isRecording: State<Boolean> = _isRecording
 
     @MainThread
-    override fun setup(context: Context, lifecycle: Lifecycle) {
-        lifecycle.addObserver(this)
-
-        capture = SimpleVideoCaptureImpl(context, listener)
+    override fun setup(context: Context) {
+        if (capture == null) capture = SimpleVideoCaptureImpl(context, listener)
         // マイクの設定を更新します．ここでは，XFEを使うように設定します．
-        mic = ThinkletMics.Xfe(context.getSystemService(AudioManager::class.java))
+        if (mic == null) mic = ThinkletMics.Xfe(context.getSystemService(AudioManager::class.java))
+        sound = MediaActionSound().apply {
+            load(MediaActionSound.START_VIDEO_RECORDING)
+            load(MediaActionSound.STOP_VIDEO_RECORDING)
+        }
+    }
+
+    @MainThread
+    override fun teardown() {
+        sound?.release()
     }
 
     override fun buildRecorder(
@@ -102,17 +112,17 @@ class MainViewModel : ViewModel(), IMainViewModel, DefaultLifecycleObserver {
             context = context,
             lifecycleOwner = lifecycleOwner,
             preview = preview,
-            videoCapture = capture.get(mic)
+            videoCapture = capture?.get(mic)
         )
     }
 
     override fun toggleRecordState(context: Context) {
-        if (capture.isRecording()) {
-            capture.stopRecording()
+        if (capture?.isRecording() == true) {
+            capture?.stopRecording()
         } else {
             val file = context.getFile()
             Toast.makeText(context, "StartRecord: ${file.absoluteFile}", Toast.LENGTH_LONG).show()
-            capture.startRecording(file)
+            capture?.startRecording(file)
         }
     }
 
@@ -122,20 +132,6 @@ class MainViewModel : ViewModel(), IMainViewModel, DefaultLifecycleObserver {
         val characteristics = cameraManager.getCameraCharacteristics(cid)
         val angle = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 90
         return arrayOf(0, 180).contains(angle)
-    }
-
-
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-        sound = MediaActionSound().apply {
-            load(MediaActionSound.START_VIDEO_RECORDING)
-            load(MediaActionSound.STOP_VIDEO_RECORDING)
-        }
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        sound?.release()
     }
 
     private fun Context.getFile(): File {
