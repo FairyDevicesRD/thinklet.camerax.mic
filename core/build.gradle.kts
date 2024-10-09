@@ -63,13 +63,16 @@ publishing {
                 name = "THINKLET CameraX mic library"
                 description = "THINKLET CameraX core module"
                 licenses {
-                    developers {
-                        developer {
-                            id = "Fairydevices"
-                            name = "Fairy Devices"
-                        }
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
                     }
-                    // TODO: apply Apache 2?
+                }
+                developers {
+                    developer {
+                        id = "Fairydevices"
+                        name = "Fairy Devices"
+                    }
                 }
                 withXml {
                     val dependenciesNode = asNode().appendNode("dependencies")
