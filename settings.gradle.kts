@@ -36,6 +36,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "thinklet.camerax.mic"
+includeBuild("build-logic")
 include(":app")
 include(":core")
 include(":multi-channel")
