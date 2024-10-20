@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
+    api(project(":core"))
     implementation(libs.androidx.annotation)
     implementation(thinkletLibs.camerax.camera.video)
     testImplementation(libs.junit)
