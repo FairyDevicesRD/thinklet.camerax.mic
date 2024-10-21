@@ -4,21 +4,24 @@ import ai.fd.thinklet.camerax.ThinkletAudioRecordWrapperFactory
 import ai.fd.thinklet.camerax.ThinkletAudioSettingsPatcher
 import ai.fd.thinklet.camerax.ThinkletMic
 import ai.fd.thinklet.camerax.mic.ThinkletMics
+import ai.fd.thinklet.sdk.audio.ExperimentalXfeFeature
+import android.media.AudioManager
 
 /**
  * An implementation of [ThinkletMic] using XFE feature.
  */
-internal object XfeThinkletMic : ThinkletMic {
+@OptIn(ExperimentalXfeFeature::class)
+internal class XfeThinkletMic(private val audioManager: AudioManager) : ThinkletMic {
 
     override fun getAudioSettingsPatcher(): ThinkletAudioSettingsPatcher = XfeAudioSettingsPatcher()
-
-    override fun getAudioRecordWrapperFactory(): ThinkletAudioRecordWrapperFactory? = null
+    override fun getAudioRecordWrapperFactory(): ThinkletAudioRecordWrapperFactory? =
+        XfeAudioRecordWrapperFactory.get(audioManager)
 }
 
 /**
- * A mic mode for using a XFE feature.
+ * A mic mode for recording using XFE + 5ch mics.
  *
- * To use this mic mode, the caller must configure to enable the XFE in advance.
+ * The number of channels output is mono(1ch) only.
+ * @param audioManager AudioManager
  */
-val ThinkletMics.Xfe: ThinkletMic
-    get() = XfeThinkletMic
+fun ThinkletMics.Xfe(audioManager: AudioManager): ThinkletMic = XfeThinkletMic(audioManager)
