@@ -13,7 +13,7 @@ internal fun Project.configurePublish() {
             publications {
                 create<MavenPublication>("maven") {
                     from(components.getByName("release"))
-                    groupId = "ai.fd.thinklet.camerax"
+                    groupId = "ai.fd.thinklet.camerax.mic"
                     artifactId = project.name
                     version = libraryVersion
 
