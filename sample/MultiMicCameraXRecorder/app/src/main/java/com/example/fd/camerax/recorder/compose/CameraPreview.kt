@@ -10,7 +10,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 fun CameraPreview(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     isLandscape: Boolean,
     renderPreview: (Preview) -> Unit,
     previewSize: Size = Size(1920, 1080)

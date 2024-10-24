@@ -6,6 +6,8 @@ import android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import com.example.fd.camerax.recorder.compose.MainScreen
 import com.example.fd.camerax.recorder.ui.theme.MultiMicCameraXRecorderTheme
 
@@ -24,6 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MultiMicCameraXRecorderTheme {
                 MainScreen(
+                    modifier = Modifier.fillMaxSize(),
                     isRecording = viewModel.isRecording,
                     isLandscape = viewModel.isLandscape(this),
                     buildPreview = {

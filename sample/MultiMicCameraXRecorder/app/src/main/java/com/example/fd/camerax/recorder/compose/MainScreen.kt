@@ -26,6 +26,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen(
+    modifier: Modifier = Modifier,
     isRecording: State<Boolean>,
     isLandscape: Boolean,
     buildPreview: (preview: Preview) -> Unit,
@@ -33,7 +34,7 @@ fun MainScreen(
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(modifier = modifier) { innerPadding ->
         Box(
             modifier = Modifier
                 .padding(innerPadding)
