@@ -64,10 +64,7 @@ dependencies {
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view) {
-        // AndroidX標準のCamera-Videoを削除．
-        exclude("androidx.camera", "camera-video")
-    }
+    implementation(libs.androidx.camera.view)
     // 代わりに，THINKLETカスタムのCamera－Videoを追加．
     implementation(thinkletLibs.camerax.video)
 
