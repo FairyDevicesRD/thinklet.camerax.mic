@@ -27,39 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-interface IMainViewModel {
-    /**
-     * 録画中の状態．
-     */
-    val isRecording: State<Boolean>
-
-    /**
-     * カメラが横向きかどうかを判定する
-     */
-    fun isLandscape(context: Context): Boolean
-
-    /**
-     * 必要なオブジェクトの生成を行います．
-     */
-    fun setup(context: Context)
-
-    /**
-     * 不要なオブジェクトの削除を行います
-     */
-    fun teardown()
-
-    /**
-     * レコーダーを生成します．引数のPreviewを与えることで，画面上にPreviewを表示します．
-     */
-    fun buildRecorder(context: Context, lifecycleOwner: LifecycleOwner, preview: Preview?)
-
-    /**
-     * 録画 <-> 停止 を切り替えます
-     */
-    fun toggleRecordState(context: Context)
-}
-
-class MainViewModel : ViewModel(), IMainViewModel {
+class MainViewModel : ViewModel() {
     init {
         // THINKLET向けの起動高速化パッチを適応します．
         CameraXPatch.apply()
@@ -87,10 +55,16 @@ class MainViewModel : ViewModel(), IMainViewModel {
             }
         }
 
-    override val isRecording: State<Boolean> = _isRecording
+    /**
+     * 録画中の状態．
+     */
+    val isRecording: State<Boolean> = _isRecording
 
+    /**
+     * 必要なオブジェクトの生成を行います．
+     */
     @MainThread
-    override fun setup(context: Context) {
+    fun setup(context: Context) {
         if (capture == null) capture = SimpleVideoCaptureImpl(context, listener)
         // マイクの設定を更新します．ここでは，XFEを使うように設定します．
         if (mic == null) mic = ThinkletMics.Xfe(context.getSystemService(AudioManager::class.java))
@@ -100,12 +74,18 @@ class MainViewModel : ViewModel(), IMainViewModel {
         }
     }
 
+    /**
+     * 不要なオブジェクトの削除を行います
+     */
     @MainThread
-    override fun teardown() {
+    fun teardown() {
         sound?.release()
     }
 
-    override fun buildRecorder(
+    /**
+     * レコーダーを生成します．引数のPreviewを与えることで，画面上にPreviewを表示します．
+     */
+    fun buildRecorder(
         context: Context, lifecycleOwner: LifecycleOwner, preview: Preview?
     ) {
         recorder.build(
@@ -116,7 +96,10 @@ class MainViewModel : ViewModel(), IMainViewModel {
         )
     }
 
-    override fun toggleRecordState(context: Context) {
+    /**
+     * 録画 <-> 停止 を切り替えます
+     */
+    fun toggleRecordState(context: Context) {
         if (capture?.isRecording() == true) {
             capture?.stopRecording()
         } else {
@@ -126,7 +109,10 @@ class MainViewModel : ViewModel(), IMainViewModel {
         }
     }
 
-    override fun isLandscape(context: Context): Boolean {
+    /**
+     * カメラが横向きかどうかを判定する
+     */
+    fun isLandscape(context: Context): Boolean {
         val cameraManager = context.getSystemService(CameraManager::class.java)
         val cid = cameraManager.cameraIdList[0]
         val characteristics = cameraManager.getCameraCharacteristics(cid)
