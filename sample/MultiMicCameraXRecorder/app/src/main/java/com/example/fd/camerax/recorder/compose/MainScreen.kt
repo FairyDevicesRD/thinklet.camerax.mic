@@ -11,14 +11,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 /**
  * カメラのPreviewを表示．録画中は右上に緑色の丸図形を描画する Compose．
@@ -31,8 +31,16 @@ fun MainScreen(
     isLandscape: Boolean,
     buildPreview: (preview: Preview) -> Unit,
 ) {
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
-    val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val permissionsState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA
+        )
+    )
+
+    LaunchedEffect(!permissionsState.allPermissionsGranted) {
+        permissionsState.launchMultiplePermissionRequest()
+    }
 
     Scaffold(modifier = modifier) { innerPadding ->
         Box(
@@ -40,11 +48,7 @@ fun MainScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if (!cameraPermissionState.status.isGranted) {
-                cameraPermissionState.launchPermissionRequest()
-            } else if (!micPermissionState.status.isGranted) {
-                micPermissionState.launchPermissionRequest()
-            } else {
+            if (permissionsState.allPermissionsGranted) {
                 CameraPreview(
                     modifier = Modifier.fillMaxWidth(),
                     isLandscape = isLandscape,
