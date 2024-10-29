@@ -1,73 +1,154 @@
 package com.example.fd.camerax.recorder.camerax
 
+import ai.fd.thinklet.camerax.ThinkletMic
+import android.Manifest
 import android.content.Context
+import androidx.annotation.GuardedBy
+import androidx.annotation.MainThread
+import androidx.annotation.RequiresPermission
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
+import androidx.camera.core.UseCase
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.FileOutputOptions
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
 import androidx.camera.video.Recorder
+import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
-import androidx.core.content.ContextCompat
+import androidx.camera.video.VideoRecordEvent
+import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
 import com.example.fd.camerax.recorder.util.Logging
-import java.util.concurrent.Executor
+import kotlinx.coroutines.guava.await
+import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-internal class ThinkletRecorder {
-    fun build(
-        context: Context,
-        lifecycleOwner: LifecycleOwner,
-        preview: Preview?,
-        videoCapture: VideoCapture<Recorder>?
-    ) {
-        val executor: Executor = ContextCompat.getMainExecutor(context)
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener(
-            {
-                val cameraProvider =
-                    cameraProviderFuture.get() ?: throw RuntimeException("Failed to get camera.")
-                bind(
-                    lifecycleOwner = lifecycleOwner,
-                    cameraProvider = cameraProvider,
-                    useCaseGroup = buildUseCaseGroup(
-                        videoCapture = videoCapture,
-                        preview = preview
-                    ),
-                )
-            },
-            executor
-        )
-    }
+internal class ThinkletRecorder private constructor(
+    private val context: Context,
+    private val recorder: Recorder,
+    private val recordEventListener: (VideoRecordEvent) -> Unit,
+    private val recorderListenerExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+) {
+    private val recordingLock: Any = Any()
 
-    private fun buildUseCaseGroup(
-        videoCapture: VideoCapture<Recorder>? = null,
-        preview: Preview? = null
-    ): UseCaseGroup {
-        return UseCaseGroup.Builder()
-            .apply { videoCapture?.also { addUseCase(it) } }
-            .apply { preview?.also { addUseCase(it) } }
-            .build()
-    }
+    @GuardedBy("recordingLock")
+    private var recording: Recording? = null
 
-    private fun bind(
-        lifecycleOwner: LifecycleOwner,
-        cameraProvider: ProcessCameraProvider,
-        useCaseGroup: UseCaseGroup
-    ) {
-        kotlin.runCatching {
-            cameraProvider.unbindAll()
-        }.onFailure {
-            Logging.w("Failed to unbindAll")
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
+    fun startRecording(outputFile: File): Boolean = synchronized(recordingLock) {
+        if (recording != null) {
+            Logging.w("already recording")
+            return false
         }
-
-        kotlin.runCatching {
-            cameraProvider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                useCaseGroup
+        Logging.d("write to ${outputFile.absolutePath}")
+        val pendingRecording = recorder
+            .prepareRecording(
+                context,
+                FileOutputOptions
+                    .Builder(outputFile)
+                    .setFileSizeLimit(FILE_SIZE)
+                    .build()
             )
-        }.onFailure {
-            Logging.e("Use case binding failed")
-            return
+            .withAudioEnabled()
+        recording = try {
+            pendingRecording.start(
+                recorderListenerExecutor,
+                Consumer<VideoRecordEvent>(::handleVideoRecordEvent)
+            )
+        } catch (e: IllegalArgumentException) {
+            Logging.e("Failed to start recording. $e")
+            e.printStackTrace()
+            return false
         }
+        return true
+    }
+
+    private fun handleVideoRecordEvent(event: VideoRecordEvent) {
+        if (event is VideoRecordEvent.Finalize) {
+            synchronized(recordingLock) {
+                recording = null
+            }
+        }
+        recordEventListener(event)
+    }
+
+    fun requestStop() {
+        synchronized(recordingLock) {
+            recording?.close()
+        }
+    }
+
+    companion object {
+
+        const val FILE_SIZE = 4L * 1000 * 1000 * 1000
+
+        @MainThread
+        suspend fun create(
+            context: Context,
+            lifecycleOwner: LifecycleOwner,
+            mic: ThinkletMic?,
+            previewSurfaceProvider: Preview.SurfaceProvider? = null,
+            recordEventListener: (VideoRecordEvent) -> Unit = {},
+            recorderExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+        ): ThinkletRecorder? {
+            CameraXPatch.apply()
+
+            val recorder = Recorder.Builder()
+                .setExecutor(recorderExecutor)
+                .setQualitySelector(QualitySelector.from(Quality.FHD))
+                .setThinkletMicIfPresent(mic)
+                .build()
+            val videoCaptureUseCase = VideoCapture.Builder(recorder).build()
+
+            val previewUseCase = if (previewSurfaceProvider != null) {
+                Preview.Builder().build().apply {
+                    surfaceProvider = previewSurfaceProvider
+                }
+            } else {
+                null
+            }
+
+            val useCaseGroup = UseCaseGroup.Builder()
+                .addUseCase(videoCaptureUseCase)
+                .addUseCaseIfPresent(previewUseCase)
+                .build()
+
+            val cameraProvider = ProcessCameraProvider.getInstance(context).await()
+            bind(cameraProvider, lifecycleOwner, useCaseGroup)
+            return ThinkletRecorder(context, recorder, recordEventListener)
+        }
+
+        @MainThread
+        private fun bind(
+            cameraProvider: ProcessCameraProvider,
+            lifecycleOwner: LifecycleOwner,
+            useCaseGroup: UseCaseGroup
+        ) {
+            runCatching {
+                cameraProvider.unbindAll()
+            }.onFailure {
+                Logging.w("Failed to unbindAll")
+            }
+
+            runCatching {
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    useCaseGroup
+                )
+            }.onFailure {
+                Logging.e("Use case binding failed")
+            }
+        }
+
+        private fun Recorder.Builder.setThinkletMicIfPresent(mic: ThinkletMic?): Recorder.Builder =
+            if (mic == null) this else setThinkletMic(mic)
+
+        private fun UseCaseGroup.Builder.addUseCaseIfPresent(
+            useCase: UseCase?
+        ): UseCaseGroup.Builder = if (useCase == null) this else addUseCase(useCase)
     }
 }
