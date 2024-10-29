@@ -12,17 +12,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.example.fd.camerax.recorder.util.Logging
 import java.util.concurrent.Executor
 
-interface ThinkletRecorder {
+internal class ThinkletRecorder {
     fun build(
-        context: Context,
-        lifecycleOwner: LifecycleOwner,
-        preview: Preview?,
-        videoCapture: VideoCapture<Recorder>?
-    )
-}
-
-internal class ThinkletRecorderImpl : ThinkletRecorder {
-    override fun build(
         context: Context,
         lifecycleOwner: LifecycleOwner,
         preview: Preview?,

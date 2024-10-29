@@ -19,9 +19,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import com.example.fd.camerax.recorder.camerax.CameraXPatch
 import com.example.fd.camerax.recorder.camerax.SimpleVideoCapture
-import com.example.fd.camerax.recorder.camerax.SimpleVideoCaptureImpl
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
-import com.example.fd.camerax.recorder.camerax.ThinkletRecorderImpl
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,7 +31,7 @@ class MainViewModel : ViewModel() {
         CameraXPatch.apply()
     }
 
-    private val recorder: ThinkletRecorder = ThinkletRecorderImpl()
+    private val recorder: ThinkletRecorder = ThinkletRecorder()
     private var capture: SimpleVideoCapture? = null
     private var mic: ThinkletMic? = null
 
@@ -65,7 +63,7 @@ class MainViewModel : ViewModel() {
      */
     @MainThread
     fun setup(context: Context) {
-        if (capture == null) capture = SimpleVideoCaptureImpl(context, listener)
+        if (capture == null) capture = SimpleVideoCapture(context, listener)
         // マイクの設定を更新します．ここでは，XFEを使うように設定します．
         if (mic == null) mic = ThinkletMics.Xfe(context.getSystemService(AudioManager::class.java))
         sound = MediaActionSound().apply {

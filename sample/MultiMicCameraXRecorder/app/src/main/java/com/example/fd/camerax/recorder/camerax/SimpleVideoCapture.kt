@@ -18,24 +18,15 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-interface SimpleVideoCapture {
-    fun get(mic: ThinkletMic? = null): VideoCapture<Recorder>
-
-    fun startRecording(outputFile: File)
-
-    fun isRecording(): Boolean
-    fun stopRecording()
-}
-
-internal class SimpleVideoCaptureImpl(
+internal class SimpleVideoCapture(
     private val context: Context,
     private val listener: Consumer<VideoRecordEvent>,
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-) : SimpleVideoCapture {
+) {
     private var videoCapture: VideoCapture<Recorder>? = null
     private var recording: Recording? = null
 
-    override fun get(mic: ThinkletMic?): VideoCapture<Recorder> {
+    fun get(mic: ThinkletMic?): VideoCapture<Recorder> {
         videoCapture = VideoCapture.withOutput(
             Recorder.Builder()
                 .setExecutor(executor)
@@ -46,11 +37,11 @@ internal class SimpleVideoCaptureImpl(
         return videoCapture!!
     }
 
-    override fun isRecording(): Boolean = (recording != null)
+    fun isRecording(): Boolean = (recording != null)
 
     @OptIn(ExperimentalPersistentRecording::class)
     @SuppressLint("MissingPermission")
-    override fun startRecording(
+    fun startRecording(
         outputFile: File,
     ) {
         if (recording != null) {
@@ -70,7 +61,7 @@ internal class SimpleVideoCaptureImpl(
             ?.start(executor, listener)
     }
 
-    override fun stopRecording() {
+    fun stopRecording() {
         if (recording == null) {
             Logging.w("already stopped")
             return
