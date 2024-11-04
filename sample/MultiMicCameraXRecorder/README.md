@@ -1,7 +1,7 @@
 # MultiMicCameraXRecorder
 - THINKLETのマルチマイクを用いた録画サンプルアプリです．
 - サンプルでは，サンプリングレート48kHz, チャンネル1ch, ビット深度16bit の設定で構成した`XFE`を用いて，録画を行います．
-  - 設定を行うのは，`MainViewModel # mic` を更新してください．(e.g. `ThinkletMics.FiveCh`)
+  - 変更するには `RecorderState.registerSurfaceProvider` 内の `mic` パラメーターを更新してください．(e.g. `ThinkletMics.FiveCh`)
 - 録画の開始と停止は，THINKLETの第2ボタン(CAMERAキー) で切り替えます．
 - 録画ファイルは，`/sdcard/Android/data/com.example.fd.camerax.recorder/files/` 以下にmp4形式で保存します．
 
