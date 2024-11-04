@@ -35,8 +35,10 @@ fun MainScreen(
         )
     )
 
-    LaunchedEffect(!permissionsState.allPermissionsGranted) {
-        permissionsState.launchMultiplePermissionRequest()
+    LaunchedEffect(permissionsState.allPermissionsGranted) {
+        if (!permissionsState.allPermissionsGranted) {
+            permissionsState.launchMultiplePermissionRequest()
+        }
     }
 
     Scaffold(modifier = modifier) { innerPadding ->
