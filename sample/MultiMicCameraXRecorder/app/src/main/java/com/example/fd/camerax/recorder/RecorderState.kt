@@ -28,6 +28,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * [ThinkletRecorder]と連携し、UI用のデータの提供やUIからのイベントを処理するクラス
+ */
 @Stable
 class RecorderState(
     private val context: Context,

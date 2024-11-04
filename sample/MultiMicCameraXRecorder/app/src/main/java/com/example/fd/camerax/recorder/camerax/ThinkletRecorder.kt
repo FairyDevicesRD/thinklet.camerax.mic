@@ -18,6 +18,7 @@ import androidx.camera.video.Recorder
 import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
+import androidx.camera.view.PreviewView
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
 import com.example.fd.camerax.recorder.util.Logging
@@ -26,6 +27,11 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+/**
+ * THINKLETのカメラを用いた録画機能を提供するクラス
+ *
+ * インスタンスの作成方法や引数に関しては[create]を参照してください。
+ */
 internal class ThinkletRecorder private constructor(
     private val context: Context,
     private val recorder: Recorder,
@@ -85,6 +91,17 @@ internal class ThinkletRecorder private constructor(
 
         const val FILE_SIZE = 4L * 1000 * 1000 * 1000
 
+        /**
+         * [ThinkletRecorder]のインスタンスを作成します
+         *
+         * メインスレッドで起動されているコルーチンから呼び出す必要があります。
+         *
+         * @param lifecycleOwner カメラのライフサイクルと紐付ける[LifecycleOwner]
+         * @param mic 使用するTHINKLET独自のマイク機能
+         * @param previewSurfaceProvider プレビューを表示する[PreviewView]から取得した[Preview.SurfaceProvider]
+         * @param recordEventListener CameraX側からの[VideoRecordEvent]イベントを受け取るリスナー
+         * @param recorderExecutor [recordEventListener]の実行スレッドを指定する[ExecutorService]
+         */
         @MainThread
         suspend fun create(
             context: Context,
