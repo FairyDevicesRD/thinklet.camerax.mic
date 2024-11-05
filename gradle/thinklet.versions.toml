@@ -1,10 +1,10 @@
 [versions]
 thinklet-sdk = "0.1.5"
-camerax-camera-video = "1.4.0-rc01"
+camerax-camera-video = "1.4.0"
 
 [libraries]
 sdk-audio = { group = "ai.fd.thinklet", name = "sdk-audio", version.ref = "thinklet-sdk" }
 sdk-gesture = { group = "ai.fd.thinklet", name = "sdk-gesture", version.ref = "thinklet-sdk" }
 sdk-led = { group = "ai.fd.thinklet", name = "sdk-led", version.ref = "thinklet-sdk" }
 sdk-maintenance = { group = "ai.fd.thinklet", name = "sdk-maintenance", version.ref = "thinklet-sdk" }
-camerax-camera-video = { group = "ai.fd.thinklet.camerax", name = "camera-video", version.ref = "camerax-camera-video" }
+camerax-camera-video = { group = "ai.fd.thinklet", name = "camerax-camera-video", version.ref = "camerax-camera-video" }
