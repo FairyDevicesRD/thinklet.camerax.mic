@@ -17,12 +17,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.getSystemService
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
@@ -54,6 +52,7 @@ class RecorderState(
     private var mediaActionSound: MediaActionSound? = null
     private val mediaActionSoundMutex: Mutex = Mutex()
 
+    @GuardedBy("recorderMutex")
     private var recorder: ThinkletRecorder? = null
     private val recorderMutex: Mutex = Mutex()
 
@@ -65,24 +64,24 @@ class RecorderState(
                 }
                 try {
                     awaitCancellation()
-                } catch (_: CancellationException) {
+                } finally {
                     mediaActionSoundMutex.withLock {
                         mediaActionSound?.release()
                     }
                 }
             }
         }
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onStop(owner: LifecycleOwner) {
-                    recorder?.requestStop()
-                }
-
-                override fun onDestroy(owner: LifecycleOwner) {
-                    owner.lifecycle.removeObserver(this)
+        lifecycleScope.launch {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                try {
+                    awaitCancellation()
+                } finally {
+                    recorderMutex.withLock {
+                        recorder?.requestStop()
+                    }
                 }
             }
-        )
+        }
     }
 
     fun registerSurfaceProvider(surfaceProvider: Preview.SurfaceProvider) {
@@ -102,9 +101,15 @@ class RecorderState(
         }
     }
 
-    @SuppressLint("MissingPermission")
     fun toggleRecordState() {
-        val localRecorder = recorder ?: return
+        lifecycleScope.launch {
+            toggleRecordStateInternal()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun toggleRecordStateInternal() = recorderMutex.withLock {
+        val localRecorder = recorder ?: return@withLock
         if (_isRecording.value) {
             localRecorder.requestStop()
         } else {
