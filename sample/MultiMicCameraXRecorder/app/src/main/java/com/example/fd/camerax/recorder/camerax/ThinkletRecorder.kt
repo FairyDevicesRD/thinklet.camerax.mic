@@ -26,6 +26,9 @@ import kotlinx.coroutines.guava.await
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * THINKLETのカメラを用いた録画機能を提供するクラス
@@ -38,13 +41,13 @@ internal class ThinkletRecorder private constructor(
     private val recordEventListener: (VideoRecordEvent) -> Unit,
     private val recorderListenerExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 ) {
-    private val recordingLock: Any = Any()
+    private val recordingLock: Lock = ReentrantLock()
 
     @GuardedBy("recordingLock")
     private var recording: Recording? = null
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    fun startRecording(outputFile: File): Boolean = synchronized(recordingLock) {
+    fun startRecording(outputFile: File): Boolean = recordingLock.withLock {
         if (recording != null) {
             Logging.w("already recording")
             return false
@@ -74,7 +77,7 @@ internal class ThinkletRecorder private constructor(
 
     private fun handleVideoRecordEvent(event: VideoRecordEvent) {
         if (event is VideoRecordEvent.Finalize) {
-            synchronized(recordingLock) {
+            recordingLock.withLock {
                 recording = null
             }
         }
@@ -82,7 +85,7 @@ internal class ThinkletRecorder private constructor(
     }
 
     fun requestStop() {
-        synchronized(recordingLock) {
+        recordingLock.withLock {
             recording?.close()
         }
     }
