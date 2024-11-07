@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.media.MediaActionSound
 import android.widget.Toast
+import androidx.annotation.GuardedBy
 import androidx.annotation.WorkerThread
 import androidx.camera.core.Preview
 import androidx.camera.video.VideoRecordEvent
@@ -17,12 +18,18 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.getSystemService
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -37,21 +44,34 @@ class RecorderState(
     private val lifecycleOwner: LifecycleOwner,
     private val lifecycleScope: CoroutineScope
 ) {
-    private val mediaActionSound: MediaActionSound = MediaActionSound().apply {
-        load(MediaActionSound.START_VIDEO_RECORDING)
-        load(MediaActionSound.STOP_VIDEO_RECORDING)
-    }
-
     val isLandscapeCamera: Boolean = isLandscape(context)
 
     private val _isRecording: MutableState<Boolean> = mutableStateOf(false)
     val isRecording: Boolean
         get() = _isRecording.value
 
+    @GuardedBy("mediaActionSoundMutex")
+    private var mediaActionSound: MediaActionSound? = null
+    private val mediaActionSoundMutex: Mutex = Mutex()
+
     private var recorder: ThinkletRecorder? = null
     private val recorderMutex: Mutex = Mutex()
 
     init {
+        lifecycleScope.launch {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                mediaActionSoundMutex.withLock {
+                    mediaActionSound = loadMediaActionSound()
+                }
+                try {
+                    awaitCancellation()
+                } catch (_: CancellationException) {
+                    mediaActionSoundMutex.withLock {
+                        mediaActionSound?.release()
+                    }
+                }
+            }
+        }
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onStop(owner: LifecycleOwner) {
@@ -101,13 +121,28 @@ class RecorderState(
     private fun handleRecordEvent(event: VideoRecordEvent) {
         when (event) {
             is VideoRecordEvent.Start -> {
-                mediaActionSound.play(MediaActionSound.START_VIDEO_RECORDING)
+                playMediaActionSound(MediaActionSound.START_VIDEO_RECORDING)
                 _isRecording.value = true
             }
 
             is VideoRecordEvent.Finalize -> {
-                mediaActionSound.play(MediaActionSound.STOP_VIDEO_RECORDING)
+                playMediaActionSound(MediaActionSound.STOP_VIDEO_RECORDING)
                 _isRecording.value = false
+            }
+        }
+    }
+
+    private suspend fun loadMediaActionSound(): MediaActionSound = withContext(Dispatchers.IO) {
+        MediaActionSound().apply {
+            load(MediaActionSound.START_VIDEO_RECORDING)
+            load(MediaActionSound.STOP_VIDEO_RECORDING)
+        }
+    }
+
+    private fun playMediaActionSound(sound: Int) {
+        lifecycleScope.launch(Dispatchers.Default) {
+            mediaActionSoundMutex.withLock {
+                mediaActionSound?.play(sound)
             }
         }
     }
