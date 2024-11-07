@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import com.example.fd.camerax.recorder.compose.MainScreen
 import com.example.fd.camerax.recorder.ui.theme.MultiMicCameraXRecorderTheme
 
@@ -19,7 +18,7 @@ import com.example.fd.camerax.recorder.ui.theme.MultiMicCameraXRecorderTheme
  */
 class MainActivity : ComponentActivity() {
     private val recorderState: RecorderState by lazy(LazyThreadSafetyMode.NONE) {
-        RecorderState(this, this, lifecycleScope)
+        RecorderState(this, this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

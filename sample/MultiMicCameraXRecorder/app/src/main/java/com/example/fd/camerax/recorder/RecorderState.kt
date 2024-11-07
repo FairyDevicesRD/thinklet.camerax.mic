@@ -19,9 +19,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.fd.camerax.recorder.camerax.ThinkletRecorder
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
@@ -39,8 +39,7 @@ import java.util.Locale
 @Stable
 class RecorderState(
     private val context: Context,
-    private val lifecycleOwner: LifecycleOwner,
-    private val lifecycleScope: CoroutineScope
+    private val lifecycleOwner: LifecycleOwner
 ) {
     val isLandscapeCamera: Boolean = isLandscape(context)
 
@@ -57,7 +56,7 @@ class RecorderState(
     private val recorderMutex: Mutex = Mutex()
 
     init {
-        lifecycleScope.launch {
+        lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 mediaActionSoundMutex.withLock {
                     mediaActionSound = loadMediaActionSound()
@@ -71,7 +70,7 @@ class RecorderState(
                 }
             }
         }
-        lifecycleScope.launch {
+        lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 try {
                     awaitCancellation()
@@ -85,7 +84,7 @@ class RecorderState(
     }
 
     fun registerSurfaceProvider(surfaceProvider: Preview.SurfaceProvider) {
-        lifecycleScope.launch {
+        lifecycleOwner.lifecycleScope.launch {
             recorderMutex.withLock {
                 if (recorder != null) {
                     return@launch
@@ -102,7 +101,7 @@ class RecorderState(
     }
 
     fun toggleRecordState() {
-        lifecycleScope.launch {
+        lifecycleOwner.lifecycleScope.launch {
             toggleRecordStateInternal()
         }
     }
@@ -145,7 +144,7 @@ class RecorderState(
     }
 
     private fun playMediaActionSound(sound: Int) {
-        lifecycleScope.launch(Dispatchers.Default) {
+        lifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
             mediaActionSoundMutex.withLock {
                 mediaActionSound?.play(sound)
             }
