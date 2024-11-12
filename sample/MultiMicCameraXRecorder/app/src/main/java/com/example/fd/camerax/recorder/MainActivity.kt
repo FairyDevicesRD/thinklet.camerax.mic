@@ -17,7 +17,9 @@ import com.example.fd.camerax.recorder.ui.theme.MultiMicCameraXRecorderTheme
  * 書き出し先ファイルは， `/sdcard/Android/data/com.example.fd.camerax.recorder/files/` 以下にmp4形式で保存されます．
  */
 class MainActivity : ComponentActivity() {
-    private val viewModel = MainViewModel()
+    private val recorderState: RecorderState by lazy(LazyThreadSafetyMode.NONE) {
+        RecorderState(this, this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,31 +29,16 @@ class MainActivity : ComponentActivity() {
             MultiMicCameraXRecorderTheme {
                 MainScreen(
                     modifier = Modifier.fillMaxSize(),
-                    isRecording = viewModel.isRecording,
-                    isLandscape = viewModel.isLandscape(this),
-                    buildPreview = {
-                        viewModel.buildRecorder(
-                            context = this, lifecycleOwner = this, preview = it
-                        )
-                    })
+                    recorderState = recorderState,
+                )
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.setup(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        viewModel.teardown()
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_CAMERA -> {
-                viewModel.toggleRecordState(this)
+                recorderState.toggleRecordState()
                 return true
             }
 
