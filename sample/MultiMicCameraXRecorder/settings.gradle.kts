@@ -22,6 +22,9 @@ dependencyResolutionManagement {
             maven {
                 name = "GitHubPackages"
                 setUrl(url)
+                content {
+                    includeGroup("ai.fd.thinklet")
+                }
                 credentials {
                     val properties = java.util.Properties()
                     properties.load(file("local.properties").inputStream())
