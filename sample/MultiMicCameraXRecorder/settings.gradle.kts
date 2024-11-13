@@ -16,18 +16,17 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        listOf(
-            "https://maven.pkg.github.com/FairyDevicesRD/thinklet.app.sdk",
-        ).forEach { url ->
-            maven {
-                name = "GitHubPackages"
-                setUrl(url)
-                credentials {
-                    val properties = java.util.Properties()
-                    properties.load(file("local.properties").inputStream())
-                    username = System.getenv("USERNAME") ?: properties.getProperty("USERNAME") ?: ""
-                    password = System.getenv("TOKEN") ?:properties.getProperty("TOKEN") ?: ""
-                }
+        maven {
+            name = "GitHubPackages"
+            setUrl("https://maven.pkg.github.com/FairyDevicesRD/thinklet.app.sdk")
+            content {
+                includeGroup("ai.fd.thinklet")
+            }
+            credentials {
+                val properties = java.util.Properties()
+                properties.load(file("local.properties").inputStream())
+                username = System.getenv("USERNAME") ?: properties.getProperty("USERNAME") ?: ""
+                password = System.getenv("TOKEN") ?: properties.getProperty("TOKEN") ?: ""
             }
         }
     }
