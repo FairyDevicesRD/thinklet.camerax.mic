@@ -4,9 +4,9 @@
   - 例えば，音声認識と音声合成したデータを与えることで，理論上ノイズが一切入らない人の発話のみを録音する機能を実現できます．
 ## サンプル
 ### THINKLETのみ
-- [MultiMicCameraXRecorder](./sample/MultiMicCameraXRecorder/README.md)
+- [MultiMicCameraXRecorder](./sample/MultiMicCameraXRecorder)
 ### THINKLET, Android向け
-- [VadMicCameraXRecorder](./sample/VadMicCameraXRecorder/README.md)
+- [VadMicCameraXRecorder](./sample/VadMicCameraXRecorder)
 ## 導入手順
 詳細については，サンプルを確認ください．
 ### 1. アクセストークン取得
