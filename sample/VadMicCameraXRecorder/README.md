@@ -1,5 +1,6 @@
 # VadMicCameraXRecorder
-- THINKLET向けCameraX を用いた "Androidデバイスでも動作可能な" 人の声を検出したときだけ音声にいれる 録画サンプルアプリです．
+- THINKLET向けCameraX を応用した人の声を検出したときだけ音声にいれる 録画サンプルアプリです．  
+Pixelなどの一般的なAndroidデバイスでも動作可能です．
 - 録画の開始と停止は，音量ダウンキー で切り替えます．
 - 録画ファイルは，`/sdcard/Android/data/com.example.fd.camerax.vadrecorder/files/` 以下にmp4形式で保存します．
 
