@@ -12,8 +12,8 @@
 # GitHub Packages経由でライブラリを取得します．下記を参考にアクセストークンを発行ください．
 # https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 # read:packages の権限が必須です
-token=<github token>
-username=<github username>
+TOKEN=<github token>
+USERNAME=<github username>
 ```
 
 - `gradlew` でのビルド
