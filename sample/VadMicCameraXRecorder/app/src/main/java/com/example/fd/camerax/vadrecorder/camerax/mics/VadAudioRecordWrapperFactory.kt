@@ -11,10 +11,6 @@ import java.nio.ByteBuffer
 @SuppressLint("MissingPermission")
 internal class VadAudioRecordWrapperFactory(private val isSpeech: (ByteArray) -> Boolean) :
     ThinkletAudioRecordWrapperFactory {
-    private companion object {
-        const val BUFFER_SIZE = 2048
-    }
-
     override fun create(
         audioSource: Int,
         audioFormat: Int,
@@ -51,5 +47,9 @@ internal class VadAudioRecordWrapperFactory(private val isSpeech: (ByteArray) ->
                 return readSize
             }
         }
+    }
+
+    private companion object {
+        const val BUFFER_SIZE = 2048
     }
 }
