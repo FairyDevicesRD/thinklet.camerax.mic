@@ -13,7 +13,7 @@ import com.example.fd.camerax.vadrecorder.camerax.mics.VadAudioRecordWrapperFact
 fun ThinkletMics.vadMic(context: Context, lifecycleOwner: LifecycleOwner): ThinkletMic =
     VadMic(context, lifecycleOwner)
 
-internal class VadMic(context: Context, lifecycleOwner: LifecycleOwner) : ThinkletMic {
+private class VadMic(context: Context, lifecycleOwner: LifecycleOwner) : ThinkletMic {
     private val vad = Vad(context, lifecycleOwner)
 
     override fun getAudioSettingsPatcher(): ThinkletAudioSettingsPatcher? =
