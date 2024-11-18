@@ -71,7 +71,8 @@
    }
   ```
 > [!IMPORTANT]
-> `camera-view` を使う場合，AndroidX標準の `camera-video` を削除，置き換えする必要があります．（上記参考）  
+> 標準の `camera-video` の実装を置き換える必要があります.
+> `androidx.camera:camera-video` への依存が含まれる `camera-view` などを使用する際には `camera-video`を依存から削除する必要があります．（上記参考）
 > プロジェクトレベルで対応するには，[Sample](./sample/MultiMicCameraXRecorder/build.gradle.kts) をご確認ください．
 ## 5. 利用
 ### すでにCameraXを使っている場合
