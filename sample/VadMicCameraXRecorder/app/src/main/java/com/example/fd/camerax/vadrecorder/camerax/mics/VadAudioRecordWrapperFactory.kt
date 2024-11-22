@@ -40,8 +40,7 @@ internal class VadAudioRecordWrapperFactory(private val isSpeech: (ByteArray) ->
                     byteBuffer.get(audioData)
                     if (!isSpeech(audioData)) {
                         // clear audio.
-                        byteBuffer.rewind()
-                        byteBuffer.put(ByteArray(readSize))
+                        byteBuffer.array().fill(0, 0, readSize)
                     }
                 }
                 return readSize
