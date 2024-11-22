@@ -1,0 +1,7 @@
+[versions]
+thinkletCameraX = "1.4.0"
+thinkletCameraXMic = "0.0.1"
+
+[libraries]
+camerax-video = { group = "ai.fd.thinklet", name = "camerax-camera-video", version.ref = "thinkletCameraX" }
+camerax-mic-core = { group = "ai.fd.thinklet", name = "camerax-mic-core", version.ref = "thinkletCameraXMic" }
