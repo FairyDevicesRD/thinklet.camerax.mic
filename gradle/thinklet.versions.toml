@@ -1,5 +1,5 @@
 [versions]
-thinklet-sdk = "0.1.5"
+thinklet-sdk = "0.1.6"
 camerax-camera-video = "1.4.0"
 
 [libraries]
