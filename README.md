@@ -1,5 +1,5 @@
 # THINKLET向けCameraX 拡張マイク
-- THINKLET向けCameraX に適応可能な拡張マイクを提供します．
+- THINKLET向けCameraX に適用可能な拡張マイクを提供します．
 - 原則として，本プロジェクトでは，THINKLETのみ動作しますが，この実装を参考に，独自のマイク実装をCameraXに入れ込むことも可能です．
   - 例えば，音声認識と音声合成したデータを与えることで，理論上ノイズが一切入らない人の発話のみを録音する機能を実現できます．
 ## サンプル
@@ -8,9 +8,9 @@
 ### THINKLET, Android向け
 - [VadMicCameraXRecorder](./sample/VadMicCameraXRecorder)
 ## 導入手順
-詳細については，サンプルを確認ください．
+実装の詳細については，[サンプル](./sample)を確認ください．
 ### 1. アクセストークン取得
-- GitHub Packages経由でライブラリは取得できます．[こちら](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)を参考に個人用アクセス トークンを発行してください．
+- GitHub Packages経由でライブラリを取得できるよう、[こちら](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)を参考に個人用アクセス トークンを発行してください．
 ### 2. アクセストークンを設定
 - クレデンシャルですので，Git管理しないように，`local.properties` などに保存を推奨します．
   ```
@@ -18,7 +18,7 @@
   USERNAME=<github username>
   ```
 ### 3. Projectレベルの `settings.gradle.kts` に設定
-- GitHub Packages まで参照できるように設定を追加します．ここでは1のアクセストークンは，`local.properties` にあるものとしています．
+- GitHub Packagesを参照する設定を追加します．ここでは手順2でアクセストークンは，`local.properties` に記載済みであるとしています．
   ```diff
   dependencyResolutionManagement {
       repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -71,7 +71,7 @@
    }
   ```
 > [!IMPORTANT]
-> 標準の `camera-video` の実装を置き換える必要があります.
+> 上記手順を行うと、標準の `camera-video` の実装を置き換えます。
 > `androidx.camera:camera-video` への依存が含まれる `camera-view` などを使用する際には `camera-video`を依存から削除する必要があります．（上記参考）
 > プロジェクトレベルで対応するには，[Sample](./sample/MultiMicCameraXRecorder/build.gradle.kts) をご確認ください．
 ## 5. 利用
