@@ -1,24 +1,24 @@
-# THINKLET向けCameraX 拡張マイク
-- THINKLET向けCameraX に適応可能な拡張マイクを提供します．
-- 原則として，本プロジェクトでは，THINKLETのみ動作しますが，この実装を参考に，独自のマイク実装をCameraXに入れ込むことも可能です．
+# THINKLET向けCameraX マイクプラグイン
+- [THINKLET向けCameraX](https://github.com/FairyDevicesRD/thinklet.camerax) 向けのマイクプラグインのソースコード，導入手順，及びサンプルアプリのソースコードを記載しています．
+- 本プロジェクトのマイクプラグインは，THINKLETのみ動作しますが，この実装を参考に，独自のマイク実装をCameraXに入れ込むことも可能です．
   - 例えば，音声認識と音声合成したデータを与えることで，理論上ノイズが一切入らない人の発話のみを録音する機能を実現できます．
 ## サンプル
 ### THINKLETのみ
-- [MultiMicCameraXRecorder](./sample/MultiMicCameraXRecorder)
+- [MultiMicCameraXRecorder](./samples/MultiMicCameraXRecorder)
 ### THINKLET, Android向け
-- [VadMicCameraXRecorder](./sample/VadMicCameraXRecorder)
+- [VadMicCameraXRecorder](./samples/VadMicCameraXRecorder)
 ## 導入手順
-詳細については，サンプルを確認ください．
+実装の詳細については，[サンプル](./sample)を確認ください．
 ### 1. アクセストークン取得
-- GitHub Packages経由でライブラリは取得できます．[こちら](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)を参考に個人用アクセス トークンを発行してください．
+- GitHub Packages経由でライブラリを取得できるよう，[こちら](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)を参考に個人用アクセス トークンを発行してください．
 ### 2. アクセストークンを設定
-- クレデンシャルですので，Git管理しないように，`local.properties` などに保存を推奨します．
+- アクセストークンは，クレデンシャルですので，Git管理しないように，`local.properties` などに保存を推奨します．
   ```
   TOKEN=<github token>
   USERNAME=<github username>
   ```
 ### 3. Projectレベルの `settings.gradle.kts` に設定
-- GitHub Packages まで参照できるように設定を追加します．ここでは1のアクセストークンは，`local.properties` にあるものとしています．
+- GitHub Packagesを参照する設定を追加します．ここでは手順2でアクセストークンは，`local.properties` に記載済みであるとしています．
   ```diff
   dependencyResolutionManagement {
       repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -40,7 +40,7 @@
   +       }
       }
   ```
-- GradleのVersionによっては，Projectの `build.gradle`, `build.gradle.kts` に記載する場合もあります．
+- また，GradleのVersionによっては，Projectの `build.gradle`, `build.gradle.kts` に記載する場合もあります．
 ### 4. Module(appなど)レベルの `build.gradle.kts` に設定
   ```diff
    dependencies {
@@ -55,7 +55,7 @@
   +        exclude("androidx.camera", "camera-video")
   +    }
   +    val thinkletCameraX = "1.4.0"
-  +    // 代わりに，THINKLETカスタムのCamera－Videoを追加．
+  +    // 代わりに，THINKLETカスタムのCamera－Videoを追加
   +    implementation("ai.fd.thinklet:camerax-camera-video:$thinkletCameraX")
 
   +    val thinkletSdk = "0.1.6"
@@ -63,17 +63,21 @@
 
   +    // THINKLET向けのマイクを追加
   +    implementation("ai.fd.thinklet:camerax-mic-core:$thinkletCameraXMic")
+  +    implementation("ai.fd.thinklet:sdk-audio:$thinkletSdk")
   +    // 5chを使用する場合
   +    implementation("ai.fd.thinklet:camerax-mic-multi-channel:$thinkletCameraXMic")
-  +    // XFE を使用する場合
+  +    // THINKLET AppSDKの 音声処理機能(※1) を使用する場合
   +    implementation("ai.fd.thinklet:camerax-mic-xfe:$thinkletCameraXMic")
-  +    implementation("ai.fd.thinklet:sdk-audio:$thinkletSdk")
    }
   ```
 > [!IMPORTANT]
-> 標準の `camera-video` の実装を置き換える必要があります.
+> 上記手順を行うと，標準の `camera-video` の実装を置き換えます．
 > `androidx.camera:camera-video` への依存が含まれる `camera-view` などを使用する際には `camera-video`を依存から削除する必要があります．（上記参考）
-> プロジェクトレベルで対応するには，[Sample](./sample/MultiMicCameraXRecorder/build.gradle.kts) をご確認ください．
+> プロジェクトレベルで対応するには，[Samples](./samples/MultiMicCameraXRecorder/build.gradle.kts) を確認ください．
+
+> [!NOTE] 
+> (※1) THINKLET AppSDKの 音声処理機能については，[こちら](https://github.com/FairyDevicesRD/thinklet.app.sdk?tab=readme-ov-file#%E8%A9%A6%E9%A8%93%E7%9A%84%E6%A9%9F%E8%83%BD-%E9%9F%B3%E5%A3%B0%E5%87%A6%E7%90%86) を確認ください．
+
 ## 5. 利用
 ### すでにCameraXを使っている場合
 - 利用するには，すでにCameraXのRecorderを利用している場合は，ライブラリの導入と，`Recorder.Builder` に `setThinkletMic` を追加します．

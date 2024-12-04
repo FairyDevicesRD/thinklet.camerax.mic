@@ -22,6 +22,12 @@ USERNAME=<github username>
 
 - `gradlew` でのビルド
 
-```
+```bash
+# デバッグインストール
+./gradlew installDebug
+# リリースビルド
 ./gradlew assembleRelease
 ```
+
+> [!NOTE] 
+> アプリ起動前に，事前にカメラとマイクのPermissionを許可してください．
