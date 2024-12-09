@@ -8,7 +8,7 @@
 ### THINKLET, Android向け
 - [VadMicCameraXRecorder](./samples/VadMicCameraXRecorder)
 ## 導入手順
-実装の詳細については，[サンプル](./sample)を確認ください．
+実装の詳細については，[サンプル](./samples)を確認ください．
 ### 1. アクセストークン取得
 - GitHub Packages経由でライブラリを取得できるよう，[こちら](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)を参考に個人用アクセス トークンを発行してください．
 ### 2. アクセストークンを設定
